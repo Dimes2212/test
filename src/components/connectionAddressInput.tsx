@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { useState } from 'react';
 
 import clearIcon from '../shared/Arrow _ Arrow Down 7.svg';
@@ -10,9 +9,11 @@ type DadataCleanAddressResponse = {
   qc_complete?: number;
 };
 
-const DADATA_ADDRESS_CLEAN_URL = '/dadata-clean/api/v1/clean/address';
+type ConnectionAddressInputProps = {
+  onCheckAddress: (address: string) => Promise<DadataCleanAddressResponse[]>;
+};
 
-export function ConnectionAddressInput() {
+export function ConnectionAddressInput({ onCheckAddress }: ConnectionAddressInputProps) {
   const [connectionAddress, setConnectionAddress] = useState('');
   const [error, setError] = useState('');
   const [fiasId, setFiasId] = useState('');
@@ -39,19 +40,8 @@ export function ConnectionAddressInput() {
     setIsChecking(true);
 
     try {
-      const response = await axios.post<DadataCleanAddressResponse[]>(
-        DADATA_ADDRESS_CLEAN_URL,
-        [trimmedAddress],
-        {
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Token ${import.meta.env.VITE_DADATA_API_KEY}`,
-            'X-Secret': import.meta.env.VITE_DADATA_SECRET_KEY,
-          },
-        },
-      );
-
-      const cleanedAddress = response.data[0];
+      const data = await onCheckAddress(trimmedAddress);
+      const cleanedAddress = data[0];
 
       if (!cleanedAddress?.result) {
         setError('Адрес не найден');
@@ -74,13 +64,8 @@ export function ConnectionAddressInput() {
         cleanedAddress.qc === 1 || cleanedAddress.qc === 3 ? 'Проверьте адрес вручную' : '',
       );
       setError('');
-    } catch (requestError) {
-      if (axios.isAxiosError(requestError) && requestError.response) {
-        setError(`DaData вернула ошибку ${requestError.response.status}`);
-      } else {
-        setError('Не удалось проверить адрес');
-      }
-
+    } catch {
+      setError('Не удалось проверить адрес');
       setFiasId('');
       setWarning('');
     } finally {

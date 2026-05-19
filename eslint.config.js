@@ -9,7 +9,7 @@ import tseslint from 'typescript-eslint';
 
 export default [
   {
-    ignores: ['dist', 'node_modules', 'table-experiment'],
+    ignores: ['dist', 'node_modules', 'table-experiment', 'server'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import clearIcon from '../shared/Arrow _ Arrow Down 7.svg';
 import pipelineDoneIcon from '../shared/Component 359.svg';
@@ -9,23 +8,42 @@ type DadataPartyResponse = {
   suggestions?: Array<{
     data?: {
       inn?: string;
+      address?: {
+        value?: string;
+        unrestricted_value?: string;
+      };
     };
   }>;
 };
 
-const DADATA_PARTY_FIND_BY_ID_URL =
-  'https://suggestions.dadata.ru/suggestions/api/4_1/rs/findById/party';
+type InnInputProps = {
+  value: string;
+  onChange: (value: string) => void;
+  onCheckInn: (inn: string) => Promise<DadataPartyResponse>;
+  onLegalAddressFound: (address: string) => void;
+};
 
-export function InnInput() {
-  const [inn, setInn] = useState('');
+export function InnInput({ value, onChange, onCheckInn, onLegalAddressFound }: InnInputProps) {
   const [error, setError] = useState('');
   const [isChecking, setIsChecking] = useState(false);
   const [stepStatus, setStepStatus] = useState('empty');
 
+  useEffect(() => {
+    if (!value) {
+      setError('');
+      setStepStatus('empty');
+      return;
+    }
+
+    if (stepStatus === 'empty') {
+      setStepStatus('typing');
+    }
+  }, [value, stepStatus]);
+
   const handleChange = (value: string) => {
     const digitsOnly = value.replace(/\D/g, '').slice(0, 12);
 
-    setInn(digitsOnly);
+    onChange(digitsOnly);
     setStepStatus(digitsOnly ? 'typing' : 'empty');
 
     if (error) {
@@ -34,13 +52,13 @@ export function InnInput() {
   };
 
   const handleBlur = async () => {
-    if (!inn) {
+    if (!value) {
       setError('');
       setStepStatus('empty');
       return;
     }
 
-    if (inn.length !== 10 && inn.length !== 12) {
+    if (value.length !== 10 && value.length !== 12) {
       setError('ИНН должен содержать 10 или 12 цифр');
       setStepStatus('typing');
       return;
@@ -49,18 +67,11 @@ export function InnInput() {
     setIsChecking(true);
 
     try {
-      const response = await axios.post<DadataPartyResponse>(
-        DADATA_PARTY_FIND_BY_ID_URL,
-        { query: inn },
-        {
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Token ${import.meta.env.VITE_DADATA_API_KEY}`,
-          },
-        },
-      );
-
-      const formattedInn = response.data.suggestions?.[0]?.data?.inn;
+      const data = await onCheckInn(value);
+      const organization = data.suggestions?.[0];
+      const formattedInn = organization?.data?.inn;
+      const legalAddress =
+        organization?.data?.address?.unrestricted_value || organization?.data?.address?.value || '';
 
       if (!formattedInn) {
         setError('ИНН не найден');
@@ -68,16 +79,12 @@ export function InnInput() {
         return;
       }
 
-      setInn(formattedInn);
+      onChange(formattedInn);
+      onLegalAddressFound(legalAddress);
       setError('');
       setStepStatus('success');
-    } catch (requestError) {
-      if (axios.isAxiosError(requestError) && requestError.response) {
-        setError(`DaData вернула ошибку ${requestError.response.status}`);
-      } else {
-        setError('Не удалось проверить ИНН');
-      }
-
+    } catch {
+      setError('Не удалось проверить ИНН');
       setStepStatus('typing');
     } finally {
       setIsChecking(false);
@@ -85,7 +92,8 @@ export function InnInput() {
   };
 
   const handleClear = () => {
-    setInn('');
+    onChange('');
+    onLegalAddressFound('');
     setError('');
     setStepStatus('empty');
   };
@@ -126,14 +134,14 @@ export function InnInput() {
             id="organization-inn"
             className={`h-[56px] w-[720px] rounded-[8px] border-0 py-[16px] pl-[16px] pr-[48px] font-onest text-[16px] font-medium leading-[24px] text-[rgba(82,82,102,1)] outline-none placeholder:text-[rgba(82,82,102,1)] ${inputColor}`}
             placeholder="Указать ИНН"
-            value={inn}
+            value={value}
             inputMode="numeric"
             maxLength={12}
             onChange={(event) => handleChange(event.target.value)}
             onBlur={() => void handleBlur()}
           />
 
-          {inn ? (
+          {value ? (
             <button
               type="button"
               className="absolute right-[16px] top-[16px] h-[24px] w-[24px]"

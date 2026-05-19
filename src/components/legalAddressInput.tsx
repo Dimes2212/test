@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import clearIcon from '../shared/Arrow _ Arrow Down 7.svg';
 import pipelineDoneIcon from '../shared/Component 359.svg';
@@ -12,18 +11,35 @@ type DadataCleanAddressResponse = {
   qc_complete?: number;
 };
 
-const DADATA_ADDRESS_CLEAN_URL = '/dadata-clean/api/v1/clean/address';
+type LegalAddressInputProps = {
+  value: string;
+  onChange: (value: string) => void;
+  onCheckAddress: (address: string) => Promise<DadataCleanAddressResponse[]>;
+};
 
-export function LegalAddressInput() {
-  const [legalAddress, setLegalAddress] = useState('');
+export function LegalAddressInput({ value, onChange, onCheckAddress }: LegalAddressInputProps) {
   const [error, setError] = useState('');
   const [fiasId, setFiasId] = useState('');
   const [warning, setWarning] = useState('');
   const [isChecking, setIsChecking] = useState(false);
   const [stepStatus, setStepStatus] = useState('empty');
 
+  useEffect(() => {
+    if (!value.trim()) {
+      setError('');
+      setFiasId('');
+      setWarning('');
+      setStepStatus('empty');
+      return;
+    }
+
+    if (stepStatus === 'empty') {
+      setStepStatus('typing');
+    }
+  }, [value, stepStatus]);
+
   const handleChange = (value: string) => {
-    setLegalAddress(value);
+    onChange(value);
     setError('');
     setFiasId('');
     setWarning('');
@@ -31,7 +47,7 @@ export function LegalAddressInput() {
   };
 
   const handleBlur = async () => {
-    const trimmedAddress = legalAddress.trim();
+    const trimmedAddress = value.trim();
 
     if (!trimmedAddress) {
       setError('Обязательное поле');
@@ -44,19 +60,8 @@ export function LegalAddressInput() {
     setIsChecking(true);
 
     try {
-      const response = await axios.post<DadataCleanAddressResponse[]>(
-        DADATA_ADDRESS_CLEAN_URL,
-        [trimmedAddress],
-        {
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Token ${import.meta.env.VITE_DADATA_API_KEY}`,
-            'X-Secret': import.meta.env.VITE_DADATA_SECRET_KEY,
-          },
-        },
-      );
-
-      const cleanedAddress = response.data[0];
+      const data = await onCheckAddress(trimmedAddress);
+      const cleanedAddress = data[0];
 
       if (!cleanedAddress?.result) {
         setError('Адрес не найден');
@@ -66,7 +71,7 @@ export function LegalAddressInput() {
         return;
       }
 
-      setLegalAddress(cleanedAddress.result);
+      onChange(cleanedAddress.result);
 
       if (cleanedAddress.qc === 2) {
         setError('Адрес пустой или не распознан');
@@ -82,13 +87,8 @@ export function LegalAddressInput() {
       );
       setError('');
       setStepStatus('success');
-    } catch (requestError) {
-      if (axios.isAxiosError(requestError) && requestError.response) {
-        setError(`DaData вернула ошибку ${requestError.response.status}`);
-      } else {
-        setError('Не удалось проверить адрес');
-      }
-
+    } catch {
+      setError('Не удалось проверить адрес');
       setFiasId('');
       setWarning('');
       setStepStatus('typing');
@@ -98,7 +98,7 @@ export function LegalAddressInput() {
   };
 
   const handleClear = () => {
-    setLegalAddress('');
+    onChange('');
     setError('');
     setFiasId('');
     setWarning('');
@@ -141,12 +141,12 @@ export function LegalAddressInput() {
             id="legal-address"
             className={`h-[56px] w-[720px] rounded-[8px] border-0 py-[16px] pl-[16px] pr-[48px] font-onest text-[16px] font-medium leading-[24px] text-[rgba(82,82,102,1)] outline-none placeholder:text-[rgba(82,82,102,1)] ${inputColor}`}
             placeholder="Указать адрес"
-            value={legalAddress}
+            value={value}
             onChange={(event) => handleChange(event.target.value)}
             onBlur={() => void handleBlur()}
           />
 
-          {legalAddress ? (
+          {value ? (
             <button
               type="button"
               className="absolute right-[16px] top-[16px] h-[24px] w-[24px]"

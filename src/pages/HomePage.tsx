@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { ChevronsRight, MoreHorizontal, Square } from 'lucide-react';
 import { useState } from 'react';
 
@@ -9,8 +10,53 @@ import { OrganizationNameTextarea } from '../components/organizationNameTextarea
 import { OrgDropdown } from '../components/organizationDropdown';
 import arrowRightSmIcon from '../shared/arrow _ right-sm.svg';
 
+type DadataPartyResponse = {
+  suggestions?: Array<{
+    data?: {
+      inn?: string;
+      address?: {
+        value?: string;
+        unrestricted_value?: string;
+      };
+    };
+  }>;
+};
+
+type DadataCleanAddressResponse = {
+  result?: string;
+  fias_id?: string;
+  inn?: string;
+  data?: {
+    inn?: string;
+  };
+  qc?: number;
+  qc_complete?: number;
+};
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
 export function HomePage() {
   const [shouldShowConnectionAddress, setShouldShowConnectionAddress] = useState(false);
+  const [inn, setInn] = useState('');
+  const [legalAddress, setLegalAddress] = useState('');
+
+  const checkInn = async (inn: string) => {
+    const response = await axios.post<DadataPartyResponse>(
+      `${API_BASE_URL}/api/dadata/find-party`,
+      { inn },
+    );
+
+    return response.data;
+  };
+
+  const checkAddress = async (address: string) => {
+    const response = await axios.post<DadataCleanAddressResponse[]>(
+      `${API_BASE_URL}/api/dadata/clean-address`,
+      { address },
+    );
+
+    return response.data;
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -58,8 +104,17 @@ export function HomePage() {
             <OrgDropdown />
             <div className="flex w-[760px] flex-col">
               <OrganizationNameTextarea />
-              <InnInput />
-              <LegalAddressInput />
+              <InnInput
+                value={inn}
+                onChange={setInn}
+                onCheckInn={checkInn}
+                onLegalAddressFound={setLegalAddress}
+              />
+              <LegalAddressInput
+                value={legalAddress}
+                onChange={setLegalAddress}
+                onCheckAddress={checkAddress}
+              />
             </div>
             <label className="flex h-[24px] w-[720px] items-center gap-[10px] font-onest text-[16px] font-medium leading-[24px] text-[#171821]">
               <input
@@ -70,7 +125,9 @@ export function HomePage() {
               />
               <span>Юридический адрес не совпадает с адресом подключения</span>
             </label>
-            {shouldShowConnectionAddress ? <ConnectionAddressInput /> : null}
+            {shouldShowConnectionAddress ? (
+              <ConnectionAddressInput onCheckAddress={checkAddress} />
+            ) : null}
             <FormActionButtons />
           </div>
         </div>
