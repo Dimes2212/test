@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 
 import clearIcon from '../shared/Arrow _ Arrow Down 7.svg';
-import pipelineDoneIcon from '../shared/Component 359.svg';
-import pipelineDotIcon from '../shared/Ellipse 78.svg';
+import Check from '../shared/check.svg?react';
+import { Input } from '../shared/ui/input';
+import { Progress } from '../shared/ui/progress';
+
+type StepStatus = 'empty' | 'success';
 
 type DadataCleanAddressResponse = {
   result?: string;
@@ -15,14 +18,25 @@ type LegalAddressInputProps = {
   value: string;
   onChange: (value: string) => void;
   onCheckAddress: (address: string) => Promise<DadataCleanAddressResponse[]>;
+  onStepStatusChange: (status: StepStatus) => void;
 };
 
-export function LegalAddressInput({ value, onChange, onCheckAddress }: LegalAddressInputProps) {
+export function LegalAddressInput({
+  value,
+  onChange,
+  onCheckAddress,
+  onStepStatusChange,
+}: LegalAddressInputProps) {
   const [error, setError] = useState('');
   const [fiasId, setFiasId] = useState('');
   const [warning, setWarning] = useState('');
   const [isChecking, setIsChecking] = useState(false);
-  const [stepStatus, setStepStatus] = useState('empty');
+  const [stepStatus, setStepStatus] = useState<StepStatus>('empty');
+
+  const changeStepStatus = (status: StepStatus) => {
+    setStepStatus(status);
+    onStepStatusChange(status);
+  };
 
   useEffect(() => {
     if (!value.trim()) {
@@ -30,20 +44,17 @@ export function LegalAddressInput({ value, onChange, onCheckAddress }: LegalAddr
       setFiasId('');
       setWarning('');
       setStepStatus('empty');
+      onStepStatusChange('empty');
       return;
     }
-
-    if (stepStatus === 'empty') {
-      setStepStatus('typing');
-    }
-  }, [value, stepStatus]);
+  }, [value, onStepStatusChange]);
 
   const handleChange = (value: string) => {
     onChange(value);
     setError('');
     setFiasId('');
     setWarning('');
-    setStepStatus(value.trim() ? 'typing' : 'empty');
+    changeStepStatus('empty');
   };
 
   const handleBlur = async () => {
@@ -53,7 +64,7 @@ export function LegalAddressInput({ value, onChange, onCheckAddress }: LegalAddr
       setError('Обязательное поле');
       setFiasId('');
       setWarning('');
-      setStepStatus('empty');
+      changeStepStatus('empty');
       return;
     }
 
@@ -67,7 +78,7 @@ export function LegalAddressInput({ value, onChange, onCheckAddress }: LegalAddr
         setError('Адрес не найден');
         setFiasId('');
         setWarning('');
-        setStepStatus('typing');
+        changeStepStatus('empty');
         return;
       }
 
@@ -77,7 +88,7 @@ export function LegalAddressInput({ value, onChange, onCheckAddress }: LegalAddr
         setError('Адрес пустой или не распознан');
         setFiasId('');
         setWarning('');
-        setStepStatus('typing');
+        changeStepStatus('empty');
         return;
       }
 
@@ -86,12 +97,12 @@ export function LegalAddressInput({ value, onChange, onCheckAddress }: LegalAddr
         cleanedAddress.qc === 1 || cleanedAddress.qc === 3 ? 'Проверьте адрес вручную' : '',
       );
       setError('');
-      setStepStatus('success');
+      changeStepStatus('success');
     } catch {
       setError('Не удалось проверить адрес');
       setFiasId('');
       setWarning('');
-      setStepStatus('typing');
+      changeStepStatus('empty');
     } finally {
       setIsChecking(false);
     }
@@ -102,44 +113,45 @@ export function LegalAddressInput({ value, onChange, onCheckAddress }: LegalAddr
     setError('');
     setFiasId('');
     setWarning('');
-    setStepStatus('empty');
+    changeStepStatus('empty');
   };
 
-  const lineColor = stepStatus === 'empty' ? 'bg-[rgb(229,232,240)]' : 'bg-[rgba(36,109,249,1)]';
-  const circleClass =
-    stepStatus === 'typing'
-      ? 'flex h-[24px] w-[24px] rounded-[24px] border-[2px] border-[rgba(36,109,249,1)] p-[4px]'
-      : 'flex h-[24px] w-[24px] p-[8px]';
   const inputColor = error ? 'bg-[rgba(255,235,235,1)]' : 'bg-[rgba(244,246,252,1)]';
 
   return (
     <div className="flex h-[112px] w-[760px] gap-[16px]">
-      <div className="flex h-[112px] w-[24px] flex-col items-center gap-[4px]">
-        {stepStatus === 'success' ? (
-          <img src={pipelineDoneIcon} className="h-[24px] w-[24px]" alt="" />
-        ) : (
-          <div className={circleClass}>
-            {stepStatus === 'empty' ? (
-              <img src={pipelineDotIcon} className="h-[8px] w-[8px]" alt="" />
-            ) : null}
-          </div>
-        )}
-        <div className={`h-[76px] w-[2px] rounded-full ${lineColor}`} />
+      <div
+        className={`flex min-h-[112px] flex-col items-center ${
+          stepStatus === 'success' ? 'transition-all duration-300' : ''
+        }`}
+      >
+        <div
+          className={`min-w-[24px] mb-2 min-h-[24px] rounded-full flex justify-center items-center ${
+            stepStatus === 'success' ? 'bg-blue' : ''
+          }`}
+        >
+          {stepStatus === 'success' ? <Check /> : <div className="bg-grey4 w-2 h-2 rounded-full" />}
+        </div>
+        <Progress
+          value={stepStatus === 'success' ? 100 : 0}
+          orientation="vertical"
+          className="h-full max-w-1 mb-2 transition-all duration-300"
+        />
       </div>
 
       <div className="flex w-[720px] flex-col gap-[8px]">
         <label
           htmlFor="legal-address"
-          className="flex h-[24px] items-center gap-[4px] font-onest text-[16px] font-semibold leading-[24px]"
+          className="flex h-[24px] items-center gap-[4px] font-onest text-[16px] font-[600] leading-[24px]"
         >
           <span>Юридический адрес</span>
           <span className="text-[rgb(252,34,34)]">*</span>
         </label>
 
         <div className="relative h-[56px] w-[720px]">
-          <input
+          <Input
             id="legal-address"
-            className={`h-[56px] w-[720px] rounded-[8px] border-0 py-[16px] pl-[16px] pr-[48px] font-onest text-[16px] font-medium leading-[24px] text-[rgba(82,82,102,1)] outline-none placeholder:text-[rgba(82,82,102,1)] ${inputColor}`}
+            className={`h-[56px] w-[720px] rounded-[8px] border-0 py-[16px] pl-[16px] pr-[48px] font-onest text-[16px] font-[500] leading-[24px] text-[rgba(82,82,102,1)] outline-none placeholder:text-[rgba(82,82,102,1)] ${inputColor}`}
             placeholder="Указать адрес"
             value={value}
             onChange={(event) => handleChange(event.target.value)}

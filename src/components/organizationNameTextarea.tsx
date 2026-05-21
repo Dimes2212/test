@@ -1,57 +1,74 @@
 import { useState } from 'react';
 
-import pipelineDoneIcon from '../shared/Component 359.svg';
-import pipelineDotIcon from '../shared/Ellipse 78.svg';
+import Check from '../shared/check.svg?react';
+import { Progress } from '../shared/ui/progress';
+import { Textarea } from '../shared/ui/textarea';
 
-export function OrganizationNameTextarea() {
-  const [organizationName, setOrganizationName] = useState('');
-  const [stepStatus, setStepStatus] = useState('empty');
+type StepStatus = 'empty' | 'success';
 
-  const handleChange = (value: string) => {
-    setOrganizationName(value);
-    setStepStatus(value.trim() ? 'typing' : 'empty');
+type OrganizationNameTextareaProps = {
+  value: string;
+  onChange: (value: string) => void;
+  onStepStatusChange: (status: StepStatus) => void;
+};
+
+export function OrganizationNameTextarea({
+  value,
+  onChange,
+  onStepStatusChange,
+}: OrganizationNameTextareaProps) {
+  const [stepStatus, setStepStatus] = useState<StepStatus>('empty');
+
+  const changeStepStatus = (status: StepStatus) => {
+    setStepStatus(status);
+    onStepStatusChange(status);
+  };
+
+  const handleChange = (nextValue: string) => {
+    onChange(nextValue);
+    changeStepStatus('empty');
   };
 
   const handleBlur = () => {
-    setStepStatus(organizationName.trim() ? 'success' : 'empty');
+    changeStepStatus(value.trim() ? 'success' : 'empty');
   };
-
-  const lineColor = stepStatus === 'empty' ? 'bg-[rgb(229,232,240)]' : 'bg-[rgba(36,109,249,1)]';
-  const circleClass =
-    stepStatus === 'typing'
-      ? 'flex h-[24px] w-[24px] rounded-[24px] border-[2px] border-[rgba(36,109,249,1)] p-[4px]'
-      : 'flex h-[24px] w-[24px] p-[8px]';
 
   return (
     <div className="flex h-[150px] w-[760px] gap-[16px]">
-      <div className="flex h-[150px] w-[24px] flex-col items-center gap-[4px]">
-        {stepStatus === 'success' ? (
-          <img src={pipelineDoneIcon} className="h-[24px] w-[24px]" alt="" />
-        ) : (
-          <div className={circleClass}>
-            {stepStatus === 'empty' ? (
-              <img src={pipelineDotIcon} className="h-[8px] w-[8px]" alt="" />
-            ) : null}
-          </div>
-        )}
-        <div className={`h-[114px] w-[2px] rounded-full ${lineColor}`} />
+      <div
+        className={`flex min-h-[150px] flex-col items-center ${
+          stepStatus === 'success' ? 'transition-all duration-300' : ''
+        }`}
+      >
+        <div
+          className={`min-w-[24px] mb-2 min-h-[24px] rounded-full flex justify-center items-center ${
+            stepStatus === 'success' ? 'bg-blue' : ''
+          }`}
+        >
+          {stepStatus === 'success' ? <Check /> : <div className="bg-grey4 w-2 h-2 rounded-full" />}
+        </div>
+        <Progress
+          value={stepStatus === 'success' ? 100 : 0}
+          orientation="vertical"
+          className="h-full max-w-1 mb-2 transition-all duration-300"
+        />
       </div>
 
       <div className="flex h-[126px] w-[720px] flex-col gap-[8px]">
         <label
           htmlFor="organization-name"
-          className="flex h-[24px] w-[294px] items-center gap-[4px] font-onest text-[16px] font-semibold leading-[24px]"
+          className="flex h-[24px] w-[294px] items-center gap-[4px] font-onest text-[16px] font-[600] leading-[24px]"
         >
           <span>Полное наименование организации</span>
           <span className="text-[rgb(252,34,34)]">*</span>
         </label>
 
         <div className="relative h-[94px] w-[720px]">
-          <textarea
+          <Textarea
             id="organization-name"
-            className="h-[94px] w-[720px] resize-none rounded-[8px] border-0 bg-[rgba(244,246,252,1)] p-[16px] font-onest text-[16px] font-medium leading-[24px] text-[rgba(82,82,102,1)] outline-none placeholder:text-[rgba(82,82,102,1)]"
+            className="h-[94px] w-[720px] resize-none rounded-[8px] border-0 bg-[rgba(244,246,252,1)] p-[16px] font-onest text-[16px] font-[500] leading-[24px] text-[rgba(82,82,102,1)] outline-none placeholder:text-[rgba(82,82,102,1)]"
             placeholder="Укажите наименование организации"
-            value={organizationName}
+            value={value}
             onChange={(event) => handleChange(event.target.value)}
             onBlur={handleBlur}
           />
