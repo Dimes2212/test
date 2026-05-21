@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import Check from '../shared/check.svg?react';
+import Check from '../assets/check.svg?react';
 import { Progress } from '../shared/ui/progress';
 import { Textarea } from '../shared/ui/textarea';
 
@@ -60,20 +60,20 @@ export function OrganizationNameTextarea({
           className="flex h-[24px] w-[294px] items-center gap-[4px] font-onest text-[16px] font-[600] leading-[24px]"
         >
           <span>Полное наименование организации</span>
-          <span className="text-[rgb(252,34,34)]">*</span>
+          <span className="text-red50">*</span>
         </label>
 
         <div className="relative h-[94px] w-[720px]">
           <Textarea
             id="organization-name"
-            className="h-[94px] w-[720px] resize-none rounded-[8px] border-0 bg-[rgba(244,246,252,1)] p-[16px] font-onest text-[16px] font-[500] leading-[24px] text-[rgba(82,82,102,1)] outline-none placeholder:text-[rgba(82,82,102,1)]"
+            className="h-[94px] w-[720px] resize-none rounded-[8px] border-0 bg-grey p-[16px] font-onest text-[16px] font-[500] leading-[24px] text-grey8 outline-none placeholder:text-grey8"
             placeholder="Укажите наименование организации"
             value={value}
             onChange={(event) => handleChange(event.target.value)}
             onBlur={handleBlur}
           />
 
-          <span className="pointer-events-none absolute bottom-[-9px] right-[-9px] h-[18px] w-[18px] rounded-br-[20px] border-b-[2px] border-r-[2px] border-[rgba(36,109,249,1)]" />
+          <span className="pointer-events-none absolute bottom-[-9px] right-[-9px] h-[18px] w-[18px] rounded-br-[20px] border-b-[2px] border-r-[2px] border-blue5" />
         </div>
       </div>
     </div>

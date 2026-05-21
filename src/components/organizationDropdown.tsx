@@ -35,27 +35,27 @@ export function OrgDropdown({ value, onChange }: OrgDropdownProps) {
           className="flex h-[24px] w-fit gap-[4px] font-onest text-[16px] font-[600] leading-[24px]"
         >
           <span>Тип организации</span>
-          <span className="text-[rgb(252,34,34)]">*</span>
+          <span className="text-red50">*</span>
         </label>
 
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
           <DropdownMenuTrigger
             id="organization-type"
-            className="flex h-[56px] w-full items-center justify-between rounded-[8px] border-[2px] border-[rgba(244,246,252,1)] bg-[rgba(244,246,252,1)] px-[16px] font-onest text-[16px] leading-[24px] text-[#56566D] outline-none"
+            className="flex h-[56px] w-full items-center justify-between rounded-[8px] border-[2px] border-grey bg-grey px-[16px] font-onest text-[16px] leading-[24px] text-grey11 outline-none"
           >
             <span>{value || 'Выбрать'}</span>
-            <ChevronDown className="size-[24px] text-[#171821]" aria-hidden="true" />
+            <ChevronDown className="size-[24px] text-text-primary" aria-hidden="true" />
           </DropdownMenuTrigger>
 
           <DropdownMenuContent
             sideOffset={4}
             align="start"
-            className="w-[760px] rounded-[16px] bg-white px-[20px] py-[24px] shadow-[0_16px_32px_rgba(20,49,81,0.16)]"
+            className="w-[760px] rounded-[16px] bg-white px-[20px] py-[24px] shadow-[0_16px_32px_var(--color-shadow-modal)]"
           >
             {organizationOptions.map((option) => (
               <DropdownMenuItem
                 key={option.value}
-                className="flex h-[40px] w-[720px] items-center rounded-[8px] px-[16px] py-[8px] font-onest text-[16px] font-[500] leading-[24px] text-[#171821] outline-none hover:bg-[rgba(244,246,252,1)] data-[highlighted]:bg-[rgba(244,246,252,1)]"
+                className="flex h-[40px] w-[720px] items-center rounded-[8px] px-[16px] py-[8px] font-onest text-[16px] font-[500] leading-[24px] text-text-primary outline-none hover:bg-grey data-[highlighted]:bg-grey"
                 onSelect={() => onChange(option.value)}
               >
                 {option.label}

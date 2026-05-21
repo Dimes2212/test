@@ -24,52 +24,63 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post('/api/dadata/find-party', async (req, res) => {
-  try {
-    const dadataResponse = await fetch(
-      'https://suggestions.dadata.ru/suggestions/api/4_1/rs/findById/party',
-      {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Token ${DADATA_API_KEY}`,
-        },
-        body: JSON.stringify({ query: req.body.inn }),
-      },
-    );
+app.post('/api/dadata/find-party', (req, res) => {
+  fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/findById/party', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Token ${DADATA_API_KEY}`,
+    },
+    body: JSON.stringify({
+      query: req.body.inn,
+    }),
+  })
+    .then((dadataResponse) =>
+      dadataResponse.json().then((data) => ({
+        status: dadataResponse.status,
+        data,
+      })),
+    )
+    .then(({ status, data }) => {
+      res.status(status).json(data);
+    })
+    .catch((error) => {
+      console.error('[find-party error]', error);
 
-    const text = await dadataResponse.text();
-    const data = text ? JSON.parse(text) : {};
-
-    res.status(dadataResponse.status).json(data);
-  } catch (error) {
-    console.error('[find-party error]', error);
-    res.status(500).json({ error: 'Ошибка проверки ИНН' });
-  }
+      res.status(500).json({
+        error: 'Ошибка проверки ИНН',
+      });
+    });
 });
 
-app.post('/api/dadata/clean-address', async (req, res) => {
-  try {
-    const dadataResponse = await fetch('https://cleaner.dadata.ru/api/v1/clean/address', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: `Token ${DADATA_API_KEY}`,
-        'X-Secret': DADATA_SECRET_KEY,
-      },
-      body: JSON.stringify([req.body.address]),
+app.post('/api/dadata/clean-address', (req, res) => {
+  fetch('https://cleaner.dadata.ru/api/v1/clean/address', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Token ${DADATA_API_KEY}`,
+      'X-Secret': DADATA_SECRET_KEY,
+    },
+    body: JSON.stringify([req.body.address]),
+  })
+    .then((dadataResponse) =>
+      dadataResponse.text().then((text) => ({
+        status: dadataResponse.status,
+        data: text ? JSON.parse(text) : {},
+      })),
+    )
+    .then(({ status, data }) => {
+      res.status(status).json(data);
+    })
+    .catch((error) => {
+      console.error('[clean-address error]', error);
+
+      res.status(500).json({
+        error: 'Ошибка проверки адреса',
+      });
     });
-
-    const text = await dadataResponse.text();
-    const data = text ? JSON.parse(text) : {};
-
-    res.status(dadataResponse.status).json(data);
-  } catch (error) {
-    console.error('[clean-address error]', error);
-    res.status(500).json({ error: 'Ошибка проверки адреса' });
-  }
 });
 
 app.listen(PORT, () => {

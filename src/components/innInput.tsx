@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import clearIcon from '../shared/Arrow _ Arrow Down 7.svg';
-import Check from '../shared/check.svg?react';
+import clearIcon from '../assets/Arrow _ Arrow Down 7.svg';
+import Check from '../assets/check.svg?react';
 import { Input } from '../shared/ui/input';
 import { Progress } from '../shared/ui/progress';
 
@@ -63,7 +63,7 @@ export function InnInput({
     }
   };
 
-  const handleBlur = async () => {
+  const handleBlur = () => {
     if (!value) {
       setError('');
       changeStepStatus('empty');
@@ -78,29 +78,33 @@ export function InnInput({
 
     setIsChecking(true);
 
-    try {
-      const data = await onCheckInn(value);
-      const organization = data.suggestions?.[0];
-      const formattedInn = organization?.data?.inn;
-      const legalAddress =
-        organization?.data?.address?.unrestricted_value || organization?.data?.address?.value || '';
+    onCheckInn(value)
+      .then((data) => {
+        const organization = data.suggestions?.[0];
+        const formattedInn = organization?.data?.inn;
+        const legalAddress =
+          organization?.data?.address?.unrestricted_value ||
+          organization?.data?.address?.value ||
+          '';
 
-      if (!formattedInn) {
-        setError('ИНН не найден');
+        if (!formattedInn) {
+          setError('ИНН не найден');
+          changeStepStatus('empty');
+          return;
+        }
+
+        onChange(formattedInn);
+        onLegalAddressFound(legalAddress);
+        setError('');
+        changeStepStatus('success');
+      })
+      .catch(() => {
+        setError('Не удалось проверить ИНН');
         changeStepStatus('empty');
-        return;
-      }
-
-      onChange(formattedInn);
-      onLegalAddressFound(legalAddress);
-      setError('');
-      changeStepStatus('success');
-    } catch {
-      setError('Не удалось проверить ИНН');
-      changeStepStatus('empty');
-    } finally {
-      setIsChecking(false);
-    }
+      })
+      .finally(() => {
+        setIsChecking(false);
+      });
   };
 
   const handleClear = () => {
@@ -110,7 +114,7 @@ export function InnInput({
     changeStepStatus('empty');
   };
 
-  const inputColor = error ? 'bg-[rgba(255,235,235,1)]' : 'bg-[rgba(244,246,252,1)]';
+  const inputColor = error ? 'bg-input-error' : 'bg-grey';
 
   return (
     <div className="flex h-[112px] w-[760px] gap-[16px]">
@@ -139,19 +143,19 @@ export function InnInput({
           className="flex h-[24px] items-center gap-[4px] font-onest text-[16px] font-[600] leading-[24px]"
         >
           <span>ИНН</span>
-          <span className="text-[rgb(252,34,34)]">*</span>
+          <span className="text-red50">*</span>
         </label>
 
         <div className="relative h-[56px] w-[720px]">
           <Input
             id="organization-inn"
-            className={`h-[56px] w-[720px] rounded-[8px] border-0 py-[16px] pl-[16px] pr-[56px] font-onest text-[16px] font-[500] leading-[24px] text-[rgba(82,82,102,1)] outline-none placeholder:text-[rgba(82,82,102,1)] ${inputColor}`}
+            className={`h-[56px] w-[720px] rounded-[8px] border-0 py-[16px] pl-[16px] pr-[56px] font-onest text-[16px] font-[500] leading-[24px] text-grey8 outline-none placeholder:text-grey8 ${inputColor}`}
             placeholder="Указать ИНН"
             value={value}
             inputMode="numeric"
             maxLength={12}
             onChange={(event) => handleChange(event.target.value)}
-            onBlur={() => void handleBlur()}
+            onBlur={handleBlur}
           />
 
           {value ? (
@@ -167,14 +171,10 @@ export function InnInput({
         </div>
 
         {isChecking ? (
-          <span className="font-onest text-[12px] leading-[16px] text-[rgba(82,82,102,1)]">
-            Проверяется...
-          </span>
+          <span className="font-onest text-[12px] leading-[16px] text-grey8">Проверяется...</span>
         ) : null}
         {error ? (
-          <span className="font-onest text-[12px] leading-[16px] text-[rgb(252,34,34)]">
-            {error}
-          </span>
+          <span className="font-onest text-[12px] leading-[16px] text-red50">{error}</span>
         ) : null}
       </div>
     </div>

@@ -8,6 +8,7 @@
   --color-green2: #007935;
   --color-green3: #00b85014;
   --color-red: #fa4d5e;
+  --color-red50: #fc2222;
   --color-red2: #fd3b3b;
   --color-red3: #e70101;
   --color-black: #000000;
@@ -23,6 +24,7 @@
   --color-blue5: #246df9;
   --color-blue6: #145ff5;
   --color-blue7: #4f87f9;
+  --color-link-blue: #246bfe;
   --color-brown: #f49e27;
   --color-brown2: #dd7d00;
   --color-orange: #fc3f1e;
@@ -35,15 +37,20 @@
   --color-grey6: #c0c0d23d;
   --color-grey7: #9797b1;
   --color-grey8: #525266;
+  --color-grey11: #56566d;
   --color-grey9: #c0c0d2;
   --color-grey10: #a2a2b9;
 
   --color-green: #0199a7;
 
   --color-border-light: #dee1ec;
+  --color-border-primary: #b7b7cc;
+  --color-input-error: #ffebeb;
+  --color-text-primary: #171821;
   --color-text-secondary: #65657d;
   --color-error: #fc3f1e;
   --color-shadow: rgba(0, 0, 0, 0.08);
+  --color-shadow-modal: rgba(20, 49, 81, 0.16);
 
   --color-gradient: linear-gradient(90deg, rgba(3, 123, 251, 1) 0%, rgba(228, 121, 255, 1) 100%);
 }
@@ -57,8 +64,8 @@
     BlinkMacSystemFont,
     'Segoe UI',
     sans-serif;
-  color: #171717;
-  background: #ffffff;
+  color: var(--color-text-primary);
+  background: var(--color-white2);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

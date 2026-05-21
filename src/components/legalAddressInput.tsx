@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import clearIcon from '../shared/Arrow _ Arrow Down 7.svg';
-import Check from '../shared/check.svg?react';
+import clearIcon from '../assets/Arrow _ Arrow Down 7.svg';
+import Check from '../assets/check.svg?react';
 import { Input } from '../shared/ui/input';
 import { Progress } from '../shared/ui/progress';
 
@@ -57,7 +57,7 @@ export function LegalAddressInput({
     changeStepStatus('empty');
   };
 
-  const handleBlur = async () => {
+  const handleBlur = () => {
     const trimmedAddress = value.trim();
 
     if (!trimmedAddress) {
@@ -70,42 +70,44 @@ export function LegalAddressInput({
 
     setIsChecking(true);
 
-    try {
-      const data = await onCheckAddress(trimmedAddress);
-      const cleanedAddress = data[0];
+    onCheckAddress(trimmedAddress)
+      .then((data) => {
+        const cleanedAddress = data[0];
 
-      if (!cleanedAddress?.result) {
-        setError('Адрес не найден');
+        if (!cleanedAddress?.result) {
+          setError('Адрес не найден');
+          setFiasId('');
+          setWarning('');
+          changeStepStatus('empty');
+          return;
+        }
+
+        onChange(cleanedAddress.result);
+
+        if (cleanedAddress.qc === 2) {
+          setError('Адрес пустой или не распознан');
+          setFiasId('');
+          setWarning('');
+          changeStepStatus('empty');
+          return;
+        }
+
+        setFiasId(cleanedAddress.fias_id ?? '');
+        setWarning(
+          cleanedAddress.qc === 1 || cleanedAddress.qc === 3 ? 'Проверьте адрес вручную' : '',
+        );
+        setError('');
+        changeStepStatus('success');
+      })
+      .catch(() => {
+        setError('Не удалось проверить адрес');
         setFiasId('');
         setWarning('');
         changeStepStatus('empty');
-        return;
-      }
-
-      onChange(cleanedAddress.result);
-
-      if (cleanedAddress.qc === 2) {
-        setError('Адрес пустой или не распознан');
-        setFiasId('');
-        setWarning('');
-        changeStepStatus('empty');
-        return;
-      }
-
-      setFiasId(cleanedAddress.fias_id ?? '');
-      setWarning(
-        cleanedAddress.qc === 1 || cleanedAddress.qc === 3 ? 'Проверьте адрес вручную' : '',
-      );
-      setError('');
-      changeStepStatus('success');
-    } catch {
-      setError('Не удалось проверить адрес');
-      setFiasId('');
-      setWarning('');
-      changeStepStatus('empty');
-    } finally {
-      setIsChecking(false);
-    }
+      })
+      .finally(() => {
+        setIsChecking(false);
+      });
   };
 
   const handleClear = () => {
@@ -116,7 +118,7 @@ export function LegalAddressInput({
     changeStepStatus('empty');
   };
 
-  const inputColor = error ? 'bg-[rgba(255,235,235,1)]' : 'bg-[rgba(244,246,252,1)]';
+  const inputColor = error ? 'bg-input-error' : 'bg-grey';
 
   return (
     <div className="flex h-[112px] w-[760px] gap-[16px]">
@@ -145,17 +147,17 @@ export function LegalAddressInput({
           className="flex h-[24px] items-center gap-[4px] font-onest text-[16px] font-[600] leading-[24px]"
         >
           <span>Юридический адрес</span>
-          <span className="text-[rgb(252,34,34)]">*</span>
+          <span className="text-red50">*</span>
         </label>
 
         <div className="relative h-[56px] w-[720px]">
           <Input
             id="legal-address"
-            className={`h-[56px] w-[720px] rounded-[8px] border-0 py-[16px] pl-[16px] pr-[48px] font-onest text-[16px] font-[500] leading-[24px] text-[rgba(82,82,102,1)] outline-none placeholder:text-[rgba(82,82,102,1)] ${inputColor}`}
+            className={`h-[56px] w-[720px] rounded-[8px] border-0 py-[16px] pl-[16px] pr-[48px] font-onest text-[16px] font-[500] leading-[24px] text-grey8 outline-none placeholder:text-grey8 ${inputColor}`}
             placeholder="Указать адрес"
             value={value}
             onChange={(event) => handleChange(event.target.value)}
-            onBlur={() => void handleBlur()}
+            onBlur={handleBlur}
           />
 
           {value ? (
@@ -171,24 +173,16 @@ export function LegalAddressInput({
         </div>
 
         {isChecking ? (
-          <span className="font-onest text-[12px] leading-[16px] text-[rgba(82,82,102,1)]">
-            Проверяется...
-          </span>
+          <span className="font-onest text-[12px] leading-[16px] text-grey8">Проверяется...</span>
         ) : null}
         {fiasId ? (
-          <span className="font-onest text-[12px] leading-[16px] text-[rgba(82,82,102,1)]">
-            ФИАС: {fiasId}
-          </span>
+          <span className="font-onest text-[12px] leading-[16px] text-grey8">ФИАС: {fiasId}</span>
         ) : null}
         {warning ? (
-          <span className="font-onest text-[12px] leading-[16px] text-[rgba(82,82,102,1)]">
-            {warning}
-          </span>
+          <span className="font-onest text-[12px] leading-[16px] text-grey8">{warning}</span>
         ) : null}
         {error ? (
-          <span className="font-onest text-[12px] leading-[16px] text-[rgb(252,34,34)]">
-            {error}
-          </span>
+          <span className="font-onest text-[12px] leading-[16px] text-red50">{error}</span>
         ) : null}
       </div>
     </div>

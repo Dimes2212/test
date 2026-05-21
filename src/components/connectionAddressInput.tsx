@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import clearIcon from '../shared/Arrow _ Arrow Down 7.svg';
+import clearIcon from '../assets/Arrow _ Arrow Down 7.svg';
 import { Input } from '../shared/ui/input';
 
 type StepStatus = 'empty' | 'success';
@@ -38,7 +38,7 @@ export function ConnectionAddressInput({
     onStepStatusChange('empty');
   };
 
-  const handleBlur = async () => {
+  const handleBlur = () => {
     const trimmedAddress = value.trim();
 
     if (!trimmedAddress) {
@@ -51,42 +51,44 @@ export function ConnectionAddressInput({
 
     setIsChecking(true);
 
-    try {
-      const data = await onCheckAddress(trimmedAddress);
-      const cleanedAddress = data[0];
+    onCheckAddress(trimmedAddress)
+      .then((data) => {
+        const cleanedAddress = data[0];
 
-      if (!cleanedAddress?.result) {
-        setError('Адрес не найден');
+        if (!cleanedAddress?.result) {
+          setError('Адрес не найден');
+          setFiasId('');
+          setWarning('');
+          onStepStatusChange('empty');
+          return;
+        }
+
+        onChange(cleanedAddress.result);
+
+        if (cleanedAddress.qc === 2) {
+          setError('Адрес пустой или не распознан');
+          setFiasId('');
+          setWarning('');
+          onStepStatusChange('empty');
+          return;
+        }
+
+        setFiasId(cleanedAddress.fias_id ?? '');
+        setWarning(
+          cleanedAddress.qc === 1 || cleanedAddress.qc === 3 ? 'Проверьте адрес вручную' : '',
+        );
+        setError('');
+        onStepStatusChange('success');
+      })
+      .catch(() => {
+        setError('Не удалось проверить адрес');
         setFiasId('');
         setWarning('');
         onStepStatusChange('empty');
-        return;
-      }
-
-      onChange(cleanedAddress.result);
-
-      if (cleanedAddress.qc === 2) {
-        setError('Адрес пустой или не распознан');
-        setFiasId('');
-        setWarning('');
-        onStepStatusChange('empty');
-        return;
-      }
-
-      setFiasId(cleanedAddress.fias_id ?? '');
-      setWarning(
-        cleanedAddress.qc === 1 || cleanedAddress.qc === 3 ? 'Проверьте адрес вручную' : '',
-      );
-      setError('');
-      onStepStatusChange('success');
-    } catch {
-      setError('Не удалось проверить адрес');
-      setFiasId('');
-      setWarning('');
-      onStepStatusChange('empty');
-    } finally {
-      setIsChecking(false);
-    }
+      })
+      .finally(() => {
+        setIsChecking(false);
+      });
   };
 
   const handleClear = () => {
@@ -97,7 +99,7 @@ export function ConnectionAddressInput({
     onStepStatusChange('empty');
   };
 
-  const inputColor = error ? 'bg-[rgba(255,235,235,1)]' : 'bg-[rgba(244,246,252,1)]';
+  const inputColor = error ? 'bg-input-error' : 'bg-grey';
 
   return (
     <div className="flex h-auto w-[720px] flex-col gap-[8px]">
@@ -106,17 +108,17 @@ export function ConnectionAddressInput({
         className="flex h-[24px] w-fit items-center gap-[4px] font-onest text-[16px] font-[600] leading-[24px]"
       >
         <span>Адрес подключения</span>
-        <span className="text-[rgb(252,34,34)]">*</span>
+        <span className="text-red50">*</span>
       </label>
 
       <div className="relative h-[56px] w-[720px]">
         <Input
           id="connection-address"
-          className={`h-[56px] w-[720px] rounded-[8px] border-0 py-[16px] pl-[16px] pr-[48px] font-onest text-[16px] font-[500] leading-[24px] text-[rgba(82,82,102,1)] outline-none placeholder:text-[rgba(82,82,102,1)] ${inputColor}`}
+          className={`h-[56px] w-[720px] rounded-[8px] border-0 py-[16px] pl-[16px] pr-[48px] font-onest text-[16px] font-[500] leading-[24px] text-grey8 outline-none placeholder:text-grey8 ${inputColor}`}
           placeholder="Указать адрес "
           value={value}
           onChange={(event) => handleChange(event.target.value)}
-          onBlur={() => void handleBlur()}
+          onBlur={handleBlur}
         />
 
         {value ? (
@@ -132,22 +134,16 @@ export function ConnectionAddressInput({
       </div>
 
       {isChecking ? (
-        <span className="font-onest text-[12px] leading-[16px] text-[rgba(82,82,102,1)]">
-          Проверяется...
-        </span>
+        <span className="font-onest text-[12px] leading-[16px] text-grey8">Проверяется...</span>
       ) : null}
       {fiasId ? (
-        <span className="font-onest text-[12px] leading-[16px] text-[rgba(82,82,102,1)]">
-          ФИАС: {fiasId}
-        </span>
+        <span className="font-onest text-[12px] leading-[16px] text-grey8">ФИАС: {fiasId}</span>
       ) : null}
       {warning ? (
-        <span className="font-onest text-[12px] leading-[16px] text-[rgba(82,82,102,1)]">
-          {warning}
-        </span>
+        <span className="font-onest text-[12px] leading-[16px] text-grey8">{warning}</span>
       ) : null}
       {error ? (
-        <span className="font-onest text-[12px] leading-[16px] text-[rgb(252,34,34)]">{error}</span>
+        <span className="font-onest text-[12px] leading-[16px] text-red50">{error}</span>
       ) : null}
     </div>
   );
