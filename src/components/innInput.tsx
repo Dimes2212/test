@@ -4,28 +4,8 @@ import clearIcon from '../assets/Arrow _ Arrow Down 7.svg';
 import Check from '../assets/check.svg?react';
 import { Input } from '../shared/ui/input';
 import { Progress } from '../shared/ui/progress';
-
-type StepStatus = 'empty' | 'success';
-
-type DadataPartyResponse = {
-  suggestions?: Array<{
-    data?: {
-      inn?: string;
-      address?: {
-        value?: string;
-        unrestricted_value?: string;
-      };
-    };
-  }>;
-};
-
-type InnInputProps = {
-  value: string;
-  onChange: (value: string) => void;
-  onCheckInn: (inn: string) => Promise<DadataPartyResponse>;
-  onLegalAddressFound: (address: string) => void;
-  onStepStatusChange: (status: StepStatus) => void;
-};
+import type { InnInputProps } from '../types/componentProps';
+import type { StepStatus } from '../types/request';
 
 export function InnInput({
   value,

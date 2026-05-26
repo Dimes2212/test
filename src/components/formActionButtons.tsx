@@ -1,10 +1,9 @@
+import * as Dialog from '@radix-ui/react-dialog';
+
 import { Button } from '../shared/ui/button';
+import type { FormActionButtonsProps } from '../types/componentProps';
 
-type FormActionButtonsProps = {
-  onSubmit: () => void;
-};
-
-export function FormActionButtons({ onSubmit }: FormActionButtonsProps) {
+export function FormActionButtons({ onSubmit, onCancel }: FormActionButtonsProps) {
   return (
     <div className="flex h-[48px] w-[760px] gap-[10px] pl-[40px]">
       <Button
@@ -16,13 +15,16 @@ export function FormActionButtons({ onSubmit }: FormActionButtonsProps) {
         <span className="h-[24px] w-[138px] text-left">Отправить заявку</span>
       </Button>
 
-      <Button
-        type="button"
-        variant="secondary"
-        className="flex h-[48px] w-[355px] items-center justify-center gap-[8px] rounded-[8px] border border-border-primary px-[24px] py-[12px] font-onest text-[16px] font-[400] leading-[24px] text-grey8"
-      >
-        <span className="w-[75px] text-left">Отменить</span>
-      </Button>
+      <Dialog.Close asChild>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onCancel}
+          className="flex h-[48px] w-[355px] items-center justify-center gap-[8px] rounded-[8px] border border-border-primary px-[24px] py-[12px] font-onest text-[16px] font-[400] leading-[24px] text-grey8"
+        >
+          <span className="w-[75px] text-left">Отменить</span>
+        </Button>
+      </Dialog.Close>
     </div>
   );
 }

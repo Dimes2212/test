@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../shared/ui/dropdown-menu';
+import type { OrgDropdownProps } from '../types/componentProps';
 
 const organizationOptions = [
   {
@@ -18,11 +19,6 @@ const organizationOptions = [
     label: 'Другое',
   },
 ];
-
-type OrgDropdownProps = {
-  value: string;
-  onChange: (value: string) => void;
-};
 
 export function OrgDropdown({ value, onChange }: OrgDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);

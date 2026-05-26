@@ -3,14 +3,8 @@ import { useState } from 'react';
 import Check from '../assets/check.svg?react';
 import { Progress } from '../shared/ui/progress';
 import { Textarea } from '../shared/ui/textarea';
-
-type StepStatus = 'empty' | 'success';
-
-type OrganizationNameTextareaProps = {
-  value: string;
-  onChange: (value: string) => void;
-  onStepStatusChange: (status: StepStatus) => void;
-};
+import type { OrganizationNameTextareaProps } from '../types/componentProps';
+import type { StepStatus } from '../types/request';
 
 export function OrganizationNameTextarea({
   value,

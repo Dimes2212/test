@@ -2,22 +2,8 @@ import { useState } from 'react';
 
 import clearIcon from '../assets/Arrow _ Arrow Down 7.svg';
 import { Input } from '../shared/ui/input';
-
-type StepStatus = 'empty' | 'success';
-
-type DadataCleanAddressResponse = {
-  result?: string;
-  fias_id?: string;
-  qc?: number;
-  qc_complete?: number;
-};
-
-type ConnectionAddressInputProps = {
-  value: string;
-  onChange: (value: string) => void;
-  onCheckAddress: (address: string) => Promise<DadataCleanAddressResponse[]>;
-  onStepStatusChange: (status: StepStatus) => void;
-};
+import type { ConnectionAddressInputProps } from '../types/componentProps';
+import { parseAddressCheck } from '../utils/addressCheck';
 
 export function ConnectionAddressInput({
   value,
@@ -53,30 +39,28 @@ export function ConnectionAddressInput({
 
     onCheckAddress(trimmedAddress)
       .then((data) => {
-        const cleanedAddress = data[0];
+        const checkedAddress = parseAddressCheck(data);
 
-        if (!cleanedAddress?.result) {
-          setError('Адрес не найден');
+        if (!checkedAddress.result) {
+          setError(checkedAddress.error);
           setFiasId('');
           setWarning('');
           onStepStatusChange('empty');
           return;
         }
 
-        onChange(cleanedAddress.result);
+        onChange(checkedAddress.result);
 
-        if (cleanedAddress.qc === 2) {
-          setError('Адрес пустой или не распознан');
+        if (checkedAddress.error) {
+          setError(checkedAddress.error);
           setFiasId('');
           setWarning('');
           onStepStatusChange('empty');
           return;
         }
 
-        setFiasId(cleanedAddress.fias_id ?? '');
-        setWarning(
-          cleanedAddress.qc === 1 || cleanedAddress.qc === 3 ? 'Проверьте адрес вручную' : '',
-        );
+        setFiasId(checkedAddress.fiasId);
+        setWarning(checkedAddress.warning);
         setError('');
         onStepStatusChange('success');
       })

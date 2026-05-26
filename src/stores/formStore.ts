@@ -1,30 +1,8 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
 
-export type StepStatus = 'empty' | 'success';
-
-type DadataPartyResponse = {
-  suggestions?: Array<{
-    data?: {
-      inn?: string;
-      address?: {
-        value?: string;
-        unrestricted_value?: string;
-      };
-    };
-  }>;
-};
-
-type DadataCleanAddressResponse = {
-  result?: string;
-  fias_id?: string;
-  inn?: string;
-  data?: {
-    inn?: string;
-  };
-  qc?: number;
-  qc_complete?: number;
-};
+import type { DadataCleanAddressResponse, DadataPartyResponse } from '../types/dadata';
+import type { RequestData, StepStatus } from '../types/request';
 
 class FormStore {
   shouldShowConnectionAddress = false;
@@ -99,7 +77,36 @@ class FormStore {
       .then((response) => response.data);
   }
 
-  handleSubmit = () => {
+  getRequestData(): RequestData {
+    return {
+      organizationType: this.organizationType,
+      organizationName: this.organizationName,
+      inn: this.inn,
+      legalAddress: this.legalAddress,
+      shouldShowConnectionAddress: this.shouldShowConnectionAddress,
+      connectionAddress: this.connectionAddress,
+    };
+  }
+
+  sendRequest(data: RequestData) {
+    return axios.post('/api/requests', data);
+  }
+
+  resetForm() {
+    this.shouldShowConnectionAddress = false;
+    this.organizationType = '';
+    this.organizationName = '';
+    this.inn = '';
+    this.legalAddress = '';
+    this.connectionAddress = '';
+    this.organizationNameStatus = 'empty';
+    this.innStatus = 'empty';
+    this.legalAddressStatus = 'empty';
+    this.connectionAddressStatus = 'empty';
+    this.formError = '';
+  }
+
+  handleSubmit() {
     const isFormValid =
       Boolean(this.organizationType) &&
       this.organizationNameStatus === 'success' &&
@@ -114,17 +121,14 @@ class FormStore {
 
     this.setFormError('');
 
-    const requestData = {
-      organizationType: this.organizationType,
-      organizationName: this.organizationName,
-      inn: this.inn,
-      legalAddress: this.legalAddress,
-      shouldShowConnectionAddress: this.shouldShowConnectionAddress,
-      connectionAddress: this.connectionAddress,
-    };
-
-    console.log(requestData);
-  };
+    return this.sendRequest(this.getRequestData())
+      .then(() => {
+        this.resetForm();
+      })
+      .catch(() => {
+        this.setFormError('Не удалось отправить заявку');
+      });
+  }
 }
 
 export const formStore = new FormStore();

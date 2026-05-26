@@ -119,7 +119,10 @@ export const HomePage = observer(function HomePage() {
                       {formStore.formError}
                     </span>
                   ) : null}
-                  <FormActionButtons onSubmit={formStore.handleSubmit} />
+                  <FormActionButtons
+                    onSubmit={formStore.handleSubmit}
+                    onCancel={formStore.resetForm}
+                  />
                 </div>
               </div>
             </div>

@@ -4,22 +4,9 @@ import clearIcon from '../assets/Arrow _ Arrow Down 7.svg';
 import Check from '../assets/check.svg?react';
 import { Input } from '../shared/ui/input';
 import { Progress } from '../shared/ui/progress';
-
-type StepStatus = 'empty' | 'success';
-
-type DadataCleanAddressResponse = {
-  result?: string;
-  fias_id?: string;
-  qc?: number;
-  qc_complete?: number;
-};
-
-type LegalAddressInputProps = {
-  value: string;
-  onChange: (value: string) => void;
-  onCheckAddress: (address: string) => Promise<DadataCleanAddressResponse[]>;
-  onStepStatusChange: (status: StepStatus) => void;
-};
+import type { LegalAddressInputProps } from '../types/componentProps';
+import type { StepStatus } from '../types/request';
+import { parseAddressCheck } from '../utils/addressCheck';
 
 export function LegalAddressInput({
   value,
@@ -72,30 +59,28 @@ export function LegalAddressInput({
 
     onCheckAddress(trimmedAddress)
       .then((data) => {
-        const cleanedAddress = data[0];
+        const checkedAddress = parseAddressCheck(data);
 
-        if (!cleanedAddress?.result) {
-          setError('Адрес не найден');
+        if (!checkedAddress.result) {
+          setError(checkedAddress.error);
           setFiasId('');
           setWarning('');
           changeStepStatus('empty');
           return;
         }
 
-        onChange(cleanedAddress.result);
+        onChange(checkedAddress.result);
 
-        if (cleanedAddress.qc === 2) {
-          setError('Адрес пустой или не распознан');
+        if (checkedAddress.error) {
+          setError(checkedAddress.error);
           setFiasId('');
           setWarning('');
           changeStepStatus('empty');
           return;
         }
 
-        setFiasId(cleanedAddress.fias_id ?? '');
-        setWarning(
-          cleanedAddress.qc === 1 || cleanedAddress.qc === 3 ? 'Проверьте адрес вручную' : '',
-        );
+        setFiasId(checkedAddress.fiasId);
+        setWarning(checkedAddress.warning);
         setError('');
         changeStepStatus('success');
       })
