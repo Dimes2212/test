@@ -1,15 +1,15 @@
 import * as Dialog from '@radix-ui/react-dialog';
 
 import { Button } from '../shared/ui/button';
-import type { FormActionButtonsProps } from '../types/componentProps';
+import { formStore } from '../stores/formStore';
 
-export function FormActionButtons({ onSubmit, onCancel }: FormActionButtonsProps) {
+export function FormActionButtons() {
   return (
     <div className="flex h-[48px] w-[760px] gap-[10px] pl-[40px]">
       <Button
         type="button"
         variant="primary"
-        onClick={onSubmit}
+        onClick={formStore.handleSubmit}
         className="flex h-[48px] w-[355px] items-center justify-center gap-[8px] rounded-[8px] bg-blue6 px-[24px] py-[12px] font-onest text-[16px] font-[400] leading-[24px] text-white"
       >
         <span className="h-[24px] w-[138px] text-left">Отправить заявку</span>
@@ -19,7 +19,7 @@ export function FormActionButtons({ onSubmit, onCancel }: FormActionButtonsProps
         <Button
           type="button"
           variant="secondary"
-          onClick={onCancel}
+          onClick={formStore.resetForm}
           className="flex h-[48px] w-[355px] items-center justify-center gap-[8px] rounded-[8px] border border-border-primary px-[24px] py-[12px] font-onest text-[16px] font-[400] leading-[24px] text-grey8"
         >
           <span className="w-[75px] text-left">Отменить</span>

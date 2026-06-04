@@ -71,29 +71,11 @@ export const HomePage = observer(function HomePage() {
                 </div>
 
                 <div className="flex h-[798px] w-[760px] flex-col gap-[32px]">
-                  <OrgDropdown
-                    value={formStore.organizationType}
-                    onChange={formStore.setOrganizationType}
-                  />
+                  <OrgDropdown />
                   <div className="flex w-[760px] flex-col">
-                    <OrganizationNameTextarea
-                      value={formStore.organizationName}
-                      onChange={formStore.setOrganizationName}
-                      onStepStatusChange={formStore.setOrganizationNameStatus}
-                    />
-                    <InnInput
-                      value={formStore.inn}
-                      onChange={formStore.setInn}
-                      onCheckInn={formStore.checkInn}
-                      onLegalAddressFound={formStore.setLegalAddress}
-                      onStepStatusChange={formStore.setInnStatus}
-                    />
-                    <LegalAddressInput
-                      value={formStore.legalAddress}
-                      onChange={formStore.setLegalAddress}
-                      onCheckAddress={formStore.checkAddress}
-                      onStepStatusChange={formStore.setLegalAddressStatus}
-                    />
+                    <OrganizationNameTextarea />
+                    <InnInput />
+                    <LegalAddressInput />
                   </div>
                   <label className="flex h-[24px] w-[720px] items-center gap-[10px] font-onest text-[16px] font-[500] leading-[24px] text-text-primary">
                     <input
@@ -106,23 +88,13 @@ export const HomePage = observer(function HomePage() {
                     />
                     <span>Юридический адрес не совпадает с адресом подключения</span>
                   </label>
-                  {formStore.shouldShowConnectionAddress ? (
-                    <ConnectionAddressInput
-                      value={formStore.connectionAddress}
-                      onChange={formStore.setConnectionAddress}
-                      onCheckAddress={formStore.checkAddress}
-                      onStepStatusChange={formStore.setConnectionAddressStatus}
-                    />
-                  ) : null}
+                  {formStore.shouldShowConnectionAddress ? <ConnectionAddressInput /> : null}
                   {formStore.formError ? (
                     <span className="pl-[40px] font-onest text-[12px] leading-[16px] text-red50">
                       {formStore.formError}
                     </span>
                   ) : null}
-                  <FormActionButtons
-                    onSubmit={formStore.handleSubmit}
-                    onCancel={formStore.resetForm}
-                  />
+                  <FormActionButtons />
                 </div>
               </div>
             </div>

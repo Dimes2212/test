@@ -1,30 +1,20 @@
-import { useState } from 'react';
+import { observer } from 'mobx-react-lite';
 
 import Check from '../assets/check.svg?react';
 import { Progress } from '../shared/ui/progress';
 import { Textarea } from '../shared/ui/textarea';
-import type { OrganizationNameTextareaProps } from '../types/componentProps';
-import type { StepStatus } from '../types/request';
+import { formStore } from '../stores/formStore';
 
-export function OrganizationNameTextarea({
-  value,
-  onChange,
-  onStepStatusChange,
-}: OrganizationNameTextareaProps) {
-  const [stepStatus, setStepStatus] = useState<StepStatus>('empty');
-
-  const changeStepStatus = (status: StepStatus) => {
-    setStepStatus(status);
-    onStepStatusChange(status);
-  };
+export const OrganizationNameTextarea = observer(function OrganizationNameTextarea() {
+  const stepStatus = formStore.organizationNameStatus;
 
   const handleChange = (nextValue: string) => {
-    onChange(nextValue);
-    changeStepStatus('empty');
+    formStore.setOrganizationName(nextValue);
+    formStore.setOrganizationNameStatus('empty');
   };
 
   const handleBlur = () => {
-    changeStepStatus(value.trim() ? 'success' : 'empty');
+    formStore.setOrganizationNameStatus(formStore.organizationName.trim() ? 'success' : 'empty');
   };
 
   return (
@@ -62,7 +52,7 @@ export function OrganizationNameTextarea({
             id="organization-name"
             className="h-[94px] w-[720px] resize-none rounded-[8px] border-0 bg-grey p-[16px] font-onest text-[16px] font-[500] leading-[24px] text-grey8 outline-none placeholder:text-grey8"
             placeholder="Укажите наименование организации"
-            value={value}
+            value={formStore.organizationName}
             onChange={(event) => handleChange(event.target.value)}
             onBlur={handleBlur}
           />
@@ -72,4 +62,4 @@ export function OrganizationNameTextarea({
       </div>
     </div>
   );
-}
+});

@@ -1,63 +1,53 @@
 import { useEffect, useState } from 'react';
+import { observer } from 'mobx-react-lite';
 
 import clearIcon from '../assets/Arrow _ Arrow Down 7.svg';
 import Check from '../assets/check.svg?react';
 import { Input } from '../shared/ui/input';
 import { Progress } from '../shared/ui/progress';
-import type { LegalAddressInputProps } from '../types/componentProps';
-import type { StepStatus } from '../types/request';
+import { formStore } from '../stores/formStore';
 import { parseAddressCheck } from '../utils/addressCheck';
 
-export function LegalAddressInput({
-  value,
-  onChange,
-  onCheckAddress,
-  onStepStatusChange,
-}: LegalAddressInputProps) {
+export const LegalAddressInput = observer(function LegalAddressInput() {
   const [error, setError] = useState('');
   const [fiasId, setFiasId] = useState('');
   const [warning, setWarning] = useState('');
   const [isChecking, setIsChecking] = useState(false);
-  const [stepStatus, setStepStatus] = useState<StepStatus>('empty');
-
-  const changeStepStatus = (status: StepStatus) => {
-    setStepStatus(status);
-    onStepStatusChange(status);
-  };
+  const stepStatus = formStore.legalAddressStatus;
 
   useEffect(() => {
-    if (!value.trim()) {
+    if (!formStore.legalAddress.trim()) {
       setError('');
       setFiasId('');
       setWarning('');
-      setStepStatus('empty');
-      onStepStatusChange('empty');
+      formStore.setLegalAddressStatus('empty');
       return;
     }
-  }, [value, onStepStatusChange]);
+  }, [formStore.legalAddress]);
 
   const handleChange = (value: string) => {
-    onChange(value);
+    formStore.setLegalAddress(value);
     setError('');
     setFiasId('');
     setWarning('');
-    changeStepStatus('empty');
+    formStore.setLegalAddressStatus('empty');
   };
 
   const handleBlur = () => {
-    const trimmedAddress = value.trim();
+    const trimmedAddress = formStore.legalAddress.trim();
 
     if (!trimmedAddress) {
       setError('Обязательное поле');
       setFiasId('');
       setWarning('');
-      changeStepStatus('empty');
+      formStore.setLegalAddressStatus('empty');
       return;
     }
 
     setIsChecking(true);
 
-    onCheckAddress(trimmedAddress)
+    formStore
+      .checkAddress(trimmedAddress)
       .then((data) => {
         const checkedAddress = parseAddressCheck(data);
 
@@ -65,30 +55,30 @@ export function LegalAddressInput({
           setError(checkedAddress.error);
           setFiasId('');
           setWarning('');
-          changeStepStatus('empty');
+          formStore.setLegalAddressStatus('empty');
           return;
         }
 
-        onChange(checkedAddress.result);
+        formStore.setLegalAddress(checkedAddress.result);
 
         if (checkedAddress.error) {
           setError(checkedAddress.error);
           setFiasId('');
           setWarning('');
-          changeStepStatus('empty');
+          formStore.setLegalAddressStatus('empty');
           return;
         }
 
         setFiasId(checkedAddress.fiasId);
         setWarning(checkedAddress.warning);
         setError('');
-        changeStepStatus('success');
+        formStore.setLegalAddressStatus('success');
       })
       .catch(() => {
         setError('Не удалось проверить адрес');
         setFiasId('');
         setWarning('');
-        changeStepStatus('empty');
+        formStore.setLegalAddressStatus('empty');
       })
       .finally(() => {
         setIsChecking(false);
@@ -96,11 +86,11 @@ export function LegalAddressInput({
   };
 
   const handleClear = () => {
-    onChange('');
+    formStore.setLegalAddress('');
     setError('');
     setFiasId('');
     setWarning('');
-    changeStepStatus('empty');
+    formStore.setLegalAddressStatus('empty');
   };
 
   const inputColor = error ? 'bg-input-error' : 'bg-grey';
@@ -140,12 +130,12 @@ export function LegalAddressInput({
             id="legal-address"
             className={`h-[56px] w-[720px] rounded-[8px] border-0 py-[16px] pl-[16px] pr-[48px] font-onest text-[16px] font-[500] leading-[24px] text-grey8 outline-none placeholder:text-grey8 ${inputColor}`}
             placeholder="Указать адрес"
-            value={value}
+            value={formStore.legalAddress}
             onChange={(event) => handleChange(event.target.value)}
             onBlur={handleBlur}
           />
 
-          {value ? (
+          {formStore.legalAddress ? (
             <button
               type="button"
               className="absolute right-[16px] top-[16px] h-[24px] w-[24px]"
@@ -172,4 +162,4 @@ export function LegalAddressInput({
       </div>
     </div>
   );
-}
+});

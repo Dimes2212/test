@@ -1,4 +1,5 @@
 import { ChevronDown } from 'lucide-react';
+import { observer } from 'mobx-react-lite';
 import { useState } from 'react';
 
 import {
@@ -7,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../shared/ui/dropdown-menu';
-import type { OrgDropdownProps } from '../types/componentProps';
+import { formStore } from '../stores/formStore';
 
 const organizationOptions = [
   {
@@ -20,7 +21,7 @@ const organizationOptions = [
   },
 ];
 
-export function OrgDropdown({ value, onChange }: OrgDropdownProps) {
+export const OrgDropdown = observer(function OrgDropdown() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -39,7 +40,7 @@ export function OrgDropdown({ value, onChange }: OrgDropdownProps) {
             id="organization-type"
             className="flex h-[56px] w-full items-center justify-between rounded-[8px] border-[2px] border-grey bg-grey px-[16px] font-onest text-[16px] leading-[24px] text-grey11 outline-none"
           >
-            <span>{value || 'Выбрать'}</span>
+            <span>{formStore.organizationType || 'Выбрать'}</span>
             <ChevronDown className="size-[24px] text-text-primary" aria-hidden="true" />
           </DropdownMenuTrigger>
 
@@ -52,7 +53,7 @@ export function OrgDropdown({ value, onChange }: OrgDropdownProps) {
               <DropdownMenuItem
                 key={option.value}
                 className="flex h-[40px] w-[720px] items-center rounded-[8px] px-[16px] py-[8px] font-onest text-[16px] font-[500] leading-[24px] text-text-primary outline-none hover:bg-grey data-[highlighted]:bg-grey"
-                onSelect={() => onChange(option.value)}
+                onSelect={() => formStore.setOrganizationType(option.value)}
               >
                 {option.label}
               </DropdownMenuItem>
@@ -62,4 +63,4 @@ export function OrgDropdown({ value, onChange }: OrgDropdownProps) {
       </div>
     </div>
   );
-}
+});
