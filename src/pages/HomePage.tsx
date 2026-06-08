@@ -19,7 +19,7 @@ export const HomePage = observer(function HomePage() {
         <Dialog.Trigger asChild>
           <Button
             variant="primary"
-            className="h-[48px] w-[200px] rounded-[8px] bg-blue6 px-[24px] font-onest text-[16px] font-[400] leading-[24px] text-white"
+            className="h-[48px] w-[200px] rounded-[8px] bg-blue6 px-[24px] font-onest text-[16px] font-[400] leading-[24px]"
           >
             Открыть форму
           </Button>

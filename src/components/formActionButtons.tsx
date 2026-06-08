@@ -10,7 +10,7 @@ export function FormActionButtons() {
         type="button"
         variant="primary"
         onClick={formStore.handleSubmit}
-        className="flex h-[48px] w-[355px] items-center justify-center gap-[8px] rounded-[8px] bg-blue6 px-[24px] py-[12px] font-onest text-[16px] font-[400] leading-[24px] text-white"
+        className="h-[48px] w-[355px] rounded-[8px] bg-blue6 px-[24px] py-[12px] font-onest text-[16px] font-[400] leading-[24px]"
       >
         <span className="h-[24px] w-[138px] text-left">Отправить заявку</span>
       </Button>
@@ -20,7 +20,7 @@ export function FormActionButtons() {
           type="button"
           variant="secondary"
           onClick={formStore.resetForm}
-          className="flex h-[48px] w-[355px] items-center justify-center gap-[8px] rounded-[8px] border border-border-primary px-[24px] py-[12px] font-onest text-[16px] font-[400] leading-[24px] text-grey8"
+          className="h-[48px] w-[355px] border-border-primary px-[24px] py-[12px] font-onest leading-[24px] text-grey8"
         >
           <span className="w-[75px] text-left">Отменить</span>
         </Button>
